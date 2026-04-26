@@ -1,0 +1,17 @@
+# Slack Configuration
+slack_webhook_url: "https://hooks.slack.com/services/YOUR/WEBHOOK/HERE"
+
+# Anomaly Detection Thresholds
+thresholds:
+  z_score_limit: 3.0
+  surge_multiplier: 5
+
+# Backoff Ban Times (in minutes)
+# These represent the duration of the ban for repeated offenses
+backoff_times:
+  - 10
+  - 30
+  - 120
+
+# Log File Path (shared volume from Nginx)
+log_file_path: "/var/log/nginx/hng-access.log"
