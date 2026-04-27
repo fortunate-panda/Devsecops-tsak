@@ -1,4 +1,4 @@
-#  DevSecOps: Nextcloud Anomaly Detection Engine
+#   DevSecOps: Nextcloud Anomaly Detection Engine
 
 An intelligent, real-time traffic monitoring and anomaly detection engine built to protect a public-facing Nextcloud deployment. This system continuously tails Nginx JSON access logs, learns what "normal" traffic looks like over time, and dynamically blocks malicious IP addresses using Linux `iptables`.
 
@@ -10,7 +10,7 @@ An intelligent, real-time traffic monitoring and anomaly detection engine built 
 
 ---
 
-##  Technology Stack & Language Choice
+## 🛠️ Technology Stack & Language Choice
 **Language:** Python 3  
 **Infrastructure:** Docker, Docker Compose, Nginx, Nextcloud (kefaslungu/hng-nextcloud)
 
@@ -59,3 +59,74 @@ If you are starting with a fresh Ubuntu VPS (22.04 or 24.04), follow these steps
 ```bash
 sudo apt update && sudo apt upgrade -y
 sudo apt install docker.io docker-compose python3-venv python3-pip -y
+```
+
+### Step 2: Clone the Repository
+```bash
+git clone [YOUR_GITHUB_REPO_LINK] hng-task
+cd hng-task
+```
+
+### Step 3: Start the Docker Infrastructure
+This spins up Nextcloud and the Nginx reverse proxy, creating a shared volume for the JSON logs.
+```bash
+sudo docker-compose up -d
+```
+
+### Step 4: Configure the Python Environment
+```bash
+cd detector
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+### Step 5: Configure Thresholds & Slack
+Edit the `config.yaml` file to include your Slack Webhook URL.
+```yaml
+slack_webhook_url: "[https://hooks.slack.com/services/](https://hooks.slack.com/services/)..."
+thresholds:
+  z_score: 3.0
+  hard_multiplier: 5.0
+```
+
+### Step 6: Run the Daemon
+Start the main engine, which handles log tailing, baseline recalculation, auto-unbanning, and the Flask UI dashboard simultaneously.
+```bash
+python3 main.py
+```
+*Note: The UI dashboard will be accessible via your configured domain name on port 80.*
+
+---
+
+##  Repository Structure
+```text
+detector/
+  ├── main.py           # Master thread controller
+  ├── monitor.py        # Log tailing & JSON parsing
+  ├── baseline.py       # 30-min rolling math calculations
+  ├── detector.py       # Sliding window & Z-score logic
+  ├── blocker.py        # iptables execution & audit logging
+  ├── unbanner.py       # Backoff schedule timekeeper
+  ├── notifier.py       # Slack webhook integration
+  ├── dashboard.py      # Flask UI & server stats
+  ├── config.yaml       # User-defined thresholds
+  ├── requirements.txt  
+  └── templates/
+      └── index.html    # Frontend auto-refreshing dashboard
+nginx/
+  └── nginx.conf        # Proxy & JSON log formatting
+docs/
+  └── architecture.png
+screenshots/
+  ├── Tool-running.png
+  ├── Ban-slack.png
+  ├── Unban-slack.png
+  ├── Global-alert-slack.png
+  ├── Iptables-banned.png
+  ├── Audit-log.png
+  └── Baseline-graph.png
+docker-compose.yml
+README.md
+```
+```
