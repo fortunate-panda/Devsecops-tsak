@@ -5,7 +5,7 @@ slack_webhook_url: "https://hooks.slack.com/services/YOUR/WEBHOOK/HERE"
 thresholds:
   z_score_limit: 3.0
   surge_multiplier: 5
-
+  error_multiplier: 3.0
 # Backoff Ban Times (in minutes)
 # These represent the duration of the ban for repeated offenses
 backoff_times:
@@ -14,4 +14,4 @@ backoff_times:
   - 120
 
 # Log File Path (shared volume from Nginx)
-log_file_path: "/var/log/nginx/hng-access.log"
+log_file_path: "logs/hng-access.log"

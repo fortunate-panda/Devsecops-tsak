@@ -1,41 +1,66 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>DevSecOps Dashboard</title>
+    <title>HNG DevSecOps Dashboard</title>
     <style>
-        body { font-family: sans-serif; background: #1a1a1a; color: white; padding: 20px; }
-        .card { background: #333; padding: 20px; margin: 10px; border-radius: 8px; display: inline-block; min-width: 200px; }
-        .alert { color: #ff4d4d; font-weight: bold; }
+        body { font-family: Arial, sans-serif; background: #1e1e2f; color: white; padding: 20px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .card { background: #2a2a3c; padding: 20px; border-radius: 8px; }
+        h2 { color: #ff5e5e; margin-top: 0; }
+        .metric { font-size: 24px; font-weight: bold; color: #4ade80; }
+        li { margin-bottom: 5px; }
     </style>
 </head>
 <body>
-    <h1>Security Monitor Dashboard</h1>
-    <div class="card">
-        <h3>Global RPS</h3>
-        <p id="rps">0.0</p>
-    </div>
-    <div class="card">
-        <h3>Banned IPs</h3>
-        <p id="banned" class="alert">0</p>
-    </div>
-    <div class="card">
-        <h3>Uptime</h3>
-        <p id="uptime">0s</p>
+    <h1> Security Monitor</h1>
+    
+    <div class="grid">
+        <div class="card">
+            <h2>Server Health</h2>
+            <p>Uptime: <span class="metric" id="uptime">Loading...</span></p>
+            <p>CPU Usage: <span class="metric" id="cpu">0</span>%</p>
+            <p>RAM Usage: <span class="metric" id="ram">0</span>%</p>
+        </div>
+
+        <div class="card">
+            <h2>Traffic Metrics</h2>
+            <p>Global Rate: <span class="metric" id="global_rps">0</span> req/s</p>
+            <p>Baseline Mean: <span class="metric" id="mean">0</span></p>
+            <p>Standard Dev: <span class="metric" id="stddev">0</span></p>
+        </div>
+
+        <div class="card">
+            <h2>Top 10 IP Addresses</h2>
+            <ol id="top_ips">Loading...</ol>
+        </div>
+
+        <div class="card">
+            <h2>Currently Banned IPs </h2>
+            <ul id="banned_ips">Loading...</ul>
+        </div>
     </div>
 
     <script>
-        function updateMetrics() {
-            fetch('/api/metrics')
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('rps').innerText = data.rps;
-                    document.getElementById('banned').innerText = data.banned_count;
-                    document.getElementById('uptime').innerText = data.uptime;
-                });
-        }
-        // Fetch every 3 seconds
-        setInterval(updateMetrics, 3000);
-        updateMetrics(); // Initial call
+        // Fetch stats every 3 seconds (3000 milliseconds)
+        setInterval(async () => {
+            const res = await fetch('/api/metrics');
+            const data = await res.json();
+            
+            document.getElementById('uptime').innerText = data.uptime;
+            document.getElementById('cpu').innerText = data.cpu;
+            document.getElementById('ram').innerText = data.ram;
+            document.getElementById('global_rps').innerText = data.global_rps.toFixed(2);
+            document.getElementById('mean').innerText = data.mean.toFixed(2);
+            document.getElementById('stddev').innerText = data.stddev.toFixed(2);
+            
+            document.getElementById('banned_ips').innerHTML = data.banned_ips.length 
+                ? data.banned_ips.map(ip => `<li>${ip}</li>`).join('') 
+                : '<li>None</li>';
+                
+            document.getElementById('top_ips').innerHTML = data.top_ips.length 
+                ? data.top_ips.map(ip => `<li>${ip[0]} (${ip[1].toFixed(2)} req/s)</li>`).join('') 
+                : '<li>No traffic yet</li>';
+        }, 3000);
     </script>
 </body>
 </html>
